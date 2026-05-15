@@ -13,57 +13,68 @@ type InputProps = {
 
 const Input = ({ input, setInput, model, setModel, isLoading, setIsLoading, onClick }: InputProps) => {
 
-    const textRef = useRef(null)
+    const textRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
+        const textArea = textRef.current
+
+        if (!textArea) return
+
+        textArea.style.height = "auto"
+        textArea.style.height = `${Math.min(textArea.scrollHeight, 150)}px`
 
     }, [input])
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if(!model.trim()) return
-        if(e.key === "Enter" && !e.shiftKey){
+        if (!model.trim()) return
+
+        if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
             onClick()
         }
     }
-    
+
     return (
-        <div className="m-10 w-1/2 rounded-3xl bg-zinc-900 flex justify-between items-center">
+        <div className="m-10 w-1/2 flex flex-col">
+                        
+            <div className="w-full flex justify-between items-center rounded-3xl p-2 bg-zinc-900">
 
-            <div className="relative m-3 flex w-9 h-9 justify-start items-center">
-                <Bot className='text-white' />
-                <select
-                    className="absolute w-full cursor-pointer opacity-0 bg-zinc-700 text-white"
-                    value={model}
-                    onChange={(e) => setModel(e.target.value)}
+                <div className="relative m-3 flex w-9 h-9 justify-start items-center">
+                    <Bot className='text-white' />
+                    <select
+                        className="absolute w-full cursor-pointer opacity-0 bg-zinc-700 text-white"
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                    >
+                        <option value="">Выберите модель</option>
+                        <option value="openrouter/owl-alpha">openrouter/owl-alpha</option>
+                        <option value="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free">nvidia/nemotron-3</option>
+                        <option value="nvidia/nemotron-3-super-120b-a12b:free">nvidia/nemotron-3-super</option>
+                        <option value="poolside/laguna-xs.2:free">poolside/laguna-xs.2:free</option>
+                        <option value="poolside/laguna-m.1:free">poolside/laguna-m.1:free</option>
+                        <option value="baidu/qianfan-ocr-fast:free">baidu/qianfan-ocr-fast:free</option>
+                    </select>
+                </div>
+
+                <textarea className="flex-1 resize-none py-2 text-white outline-none placeholder:text-zinc-500"
+                    value={input}
+                    ref={textRef}
+                    rows={1}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Какой вопрос сегодня?"
+                    onChange={(e) => setInput(e.target.value)} />
+
+                <button
+                    disabled={isLoading || !input.trim() || !model}
+                    className={`flex justify-center items-center rounded-full h-9 w-9 m-3
+                    ${isLoading || !input.trim() || !model.trim()
+                            ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
+                            : 'bg-white text-black hover:bg-zinc-200'}`}
+                    onClick={onClick}
                 >
-                    <option value="">Выберите модель</option>
-                    <option value="openrouter/owl-alpha">openrouter/owl-alpha</option>
-                    <option value="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free">nvidia/nemotron-3</option>
-                    <option value="nvidia/nemotron-3-super-120b-a12b:free">nvidia/nemotron-3-super</option>
-                    <option value="poolside/laguna-xs.2:free">poolside/laguna-xs.2:free</option>
-                    <option value="poolside/laguna-m.1:free">poolside/laguna-m.1:free</option>
-                    <option value="baidu/qianfan-ocr-fast:free">baidu/qianfan-ocr-fast:free</option>
-                </select>
+                    <ArrowUp />
+                </button>
             </div>
-
-            <textarea className="flex-1 resize-none py-2 text-white outline-none placeholder:text-zinc-500"
-                value={input}
-                ref={textRef}
-                rows={1}
-                onKeyDown={handleKeyDown}
-                placeholder="Какой вопрос сегодня?"
-                onChange={(e) => setInput(e.target.value)} />
-            <button
-                disabled={isLoading || !input.trim() || !model}
-                className={`flex justify-center items-center rounded-full h-9 w-9
-                ${isLoading || !input.trim() || !model.trim()
-                    ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
-                    : 'bg-white text-black hover:bg-zinc-200'}`}
-                onClick={onClick}
-            >
-                <ArrowUp />
-            </button>
         </div>
     )
 }
