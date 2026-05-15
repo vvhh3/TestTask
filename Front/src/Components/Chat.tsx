@@ -3,7 +3,7 @@ import Input from "./Input"
 import axios from "axios"
 
 type MessageType ={
-    id: Date
+    id: number
     text: string
 }
 
@@ -17,13 +17,13 @@ const Chat = () => {
         try {
             setIsLoading(true)
             const res = await axios.post("http://localhost:5000/api/chat", {
-                answer: input,
+                input: input,
                 model: model
             })
 
             setIsLoading(false)
             setInput("")
-            setResponse([...response, {id: new Date(), text:res.data}])
+            setResponse([...response, {id: Date.now(), text:res.data.answer}])
         } catch (e) {
             console.log(e)
         }
@@ -36,7 +36,7 @@ const Chat = () => {
                 {response ? (
 
                     response.map((msg) => (
-                        <div key={msg.id.toString()}>
+                        <div key={msg.id}>
                             <p>Ответ:{msg.text}</p>
                             <p>модель: {model}</p>
                         </div>
