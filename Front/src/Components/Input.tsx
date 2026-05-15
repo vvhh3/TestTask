@@ -28,6 +28,7 @@ const Input = ({ input, setInput, isLoading, onClick }: InputProps) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
             onClick()
+            setInput("")
         }
     }
 

@@ -1,5 +1,5 @@
 import { Mic } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 type VoiceInputProps = {
     isLoading: boolean
@@ -17,26 +17,19 @@ declare global {
 const VoiceInput = ({ isLoading, setInput }: VoiceInputProps) => {
 
     const [isListening, setIsListening] = useState(false)
+    const recognitionRef = useRef<any>(null)
 
-    const handleVoiceInput = () => {
-        
+    useEffect(() => {
         // Берём API из браузера
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-        
+
         // Проверка поддержки
         if (!SpeechRecognition) {
             alert("Ваш браузер не поддерживает запись голоса")
             return
         }
-        
         // Создаёт новый SpeechRecognition объект.
         const recognition = new SpeechRecognition()
-        
-        if(isListening) {
-            setIsListening(false)
-            recognition.stop()
-            return
-        }
 
         // Устанавливаем язык распознавания
         recognition.lang = "ru-RU"
@@ -47,25 +40,43 @@ const VoiceInput = ({ isLoading, setInput }: VoiceInputProps) => {
 
         // Контроллирует, следует ли возвращать промежуточные результаты (true) или нет (false.) 
         // Промежуточные результаты это результаты которые ещё не завершены
-        recognition.interimResults = false
+        recognition.interimResults = true
 
         //Вызывается когда возвращает результат — слово или фраза были распознаны положительно,
         //и это было передано обратно в приложение.
-        recognition.onresult = (event: any) => {
-            const transcript = event.results[0][0].transcript
+        recognition.onresult = (e: any) => {
+            let text = ''
 
-            // Подставляем текст в input
-            setInput(transcript)
+            for (let i = 0; i < e.results.length; i++) {
+                text += e.results[i][0].transcript + ''
+            }
+
+            setInput(text)
         }
 
-        // Ошибка
-        recognition.onerror = (event: any) => {
-            console.log(event.error)
+        //Ошибка
+        recognition.onerror = (e: any) => {
+            console.log(e.error)
         }
 
-        // Старт записи
-        recognition.start()
-        setIsListening(true)
+        //Когда запись остановилась
+        recognition.onend = () => {
+            setIsListening(false)
+        }
+
+        recognitionRef.current = recognition
+
+    }, [])
+
+    const handleVoiceInput = () => {
+        if (!recognitionRef.current) return
+        
+        if (isListening) {
+            recognitionRef.current.stop()
+        } else {
+            recognitionRef.current.start()
+            setIsListening(true)
+        }
     }
 
     return (
@@ -73,9 +84,10 @@ const VoiceInput = ({ isLoading, setInput }: VoiceInputProps) => {
             <button
                 onClick={handleVoiceInput}
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition 
-            ${isLoading ? 'cursor-not-allowed'
+
+                ${isLoading ? 'bg-zinc-900 text-zinc-400 cursor-not-allowed'
                         : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-700'}`}>
-                <Mic className=" w-5 h-5" />
+                <Mic className={` w-5 h-5 ${isListening ? `text-red-600`:``}`} />
             </button>
         </div>
     )
