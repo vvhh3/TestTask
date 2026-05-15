@@ -50,7 +50,7 @@ const VoiceInput = ({ isLoading, setInput }: VoiceInputProps) => {
         recognition.interimResults = false
 
         //Вызывается когда возвращает результат — слово или фраза были распознаны положительно,
-        //  и это было передано обратно в приложение.
+        //и это было передано обратно в приложение.
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript
 

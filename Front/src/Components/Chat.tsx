@@ -24,8 +24,6 @@ const Chat = () => {
 
             setIsLoading(false)
             setInput("")
-            console.log("res",res.data.answer)
-            console.log("data",res.data)
             setResponse([...response, {id: Date.now(), text:res.data.answer}])
         } catch (e) {
             console.log(e)
