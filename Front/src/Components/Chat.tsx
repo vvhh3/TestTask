@@ -1,6 +1,9 @@
 import { useState } from "react"
 import Input from "./Input"
 import axios from "axios"
+import Markdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import rehypeHighlight from "rehype-highlight"
 
 type MessageType ={
     id: number
@@ -9,7 +12,6 @@ type MessageType ={
 
 const Chat = () => {
     const [input, setInput] = useState("")
-    const [model, setModel] = useState("")
     const [response, setResponse] = useState<MessageType[]>([])
     const [isLoading, setIsLoading] = useState(false)
 
@@ -18,11 +20,12 @@ const Chat = () => {
             setIsLoading(true)
             const res = await axios.post("http://localhost:5000/api/chat", {
                 input: input,
-                model: model
             })
 
             setIsLoading(false)
             setInput("")
+            console.log("res",res.data.answer)
+            console.log("data",res.data)
             setResponse([...response, {id: Date.now(), text:res.data.answer}])
         } catch (e) {
             console.log(e)
@@ -31,27 +34,26 @@ const Chat = () => {
 
     return (
 
-        <div className="flex flex-col">
-            <div>
-                {response ? (
+        <div className="flex">
+            <div className='flex-col flex w-full min-h-screen items-center justify-end'>
 
-                    response.map((msg) => (
-                        <div key={msg.id}>
-                            <p>Ответ:{msg.text}</p>
-                            <p>модель: {model}</p>
-                        </div>
-                    ))
-                ) : null}
-            </div>
-            <div className="flex w-full min-h-screen justify-center items-end">
+                {response && (
+                    <div className='w-1/2'>
 
+                        {response.map(r => (
+                            <div key={r.id} className='text-white rounded-3xl bg-zinc-900 p-5 m-3'>
+                                <h2>Мой Ответ:</h2>
+                                <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{r.text}</Markdown>
+                            </div>
+                        ))}
+
+                        {isLoading && <div >Думаю...</div>}
+                    </div>
+                )}
                 <Input
                     input={input}
                     setInput={setInput}
-                    model={model}
-                    setModel={setModel}
                     isLoading={isLoading}
-                    setIsLoading={setIsLoading}
                     onClick={SendMessage}
                 />
             </div>

@@ -1,7 +1,7 @@
-import express from "express"
-import cors from "cors"
-import OpenAI from "openai"
-import dotenv from "dotenv"
+const express = require("express")
+const cors = require("cors")
+const OpenAI = require ("openai")
+const dotenv = require("dotenv")
 
 dotenv.config()
 
@@ -10,29 +10,33 @@ app.use(cors())
 app.use(express.json())
 
 const client = new OpenAI({
-    baseURL:"https://openrouter.ai/api/v1",
+    baseURL: "https://openrouter.ai/api/v1",
     apiKey: process.env.OPENROUTER_API_KEY
 })
 
-app.post("/api/chat",async (req,res) => {
-    const {input,model} = req.body
-    try{
+app.post("/api/chat", async (req, res) => {
+    const { input } = req.body
+    const model = "openrouter/owl-alpha"
+    try {
         const response = await client.chat.completions.create({
             model: model,
-            messages:[
+            messages: [
                 {
-                    role:"user",
+                    role: "user",
                     content: input
                 }
             ]
         })
-        res.json({answer: response.choices[0].message.content})
-    }catch(e){
+        res.json({
+            answer: response.choices[0].message.content,
+            model: model
+        })
+    } catch (e) {
         console.log(e)
-        res.status(500).json({error: " error"})
+        res.status(500).json({ error: " error" })
     }
 })
 
-app.listen(5000,() => {
+app.listen(5000, () => {
     console.log("server started on port 5000")
 })
